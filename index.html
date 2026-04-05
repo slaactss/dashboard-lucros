@@ -385,12 +385,11 @@ function openMonthModal(idx) {
       '<span class="modal-rank-val">'+fmtK(v)+'</span>'+
     '</div>';
   }).join('');
-  document.getElementById('modalOverlay').classList.add('open');
+  var mo=document.getElementById('modalOverlay');mo.style.opacity='1';mo.style.pointerEvents='all';
 }
 
 window.closeModal = function(e) {
-  if(e.target===document.getElementById('modalOverlay'))
-    document.getElementById('modalOverlay').classList.remove('open');
+  if(e.target===document.getElementById('modalOverlay')){var o=document.getElementById('modalOverlay');o.style.opacity=0;setTimeout(function(){o.style.pointerEvents='none'},200);}
 };
 
 window.toggleChart = function(type) {
