@@ -150,10 +150,33 @@
       <div style="position:relative;height:220px"><canvas id="chartCasas"></canvas></div>
     </div>
   </div>
+
+<div id="modalOverlay" onclick="closeModal(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none;">
+  <div style="background:#16181f;border:0.5px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;width:480px;max-width:92vw;transform:translateY(10px);transition:transform .2s;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <span id="modalTitle" style="font-size:16px;font-weight:500;"></span>
+      <button onclick="var o=document.getElementById('modalOverlay');o.style.opacity=0;setTimeout(function(){o.style.pointerEvents='none'},200);" style="background:none;border:none;color:#666876;cursor:pointer;font-size:24px;line-height:1;padding:0;">x</button>
+    </div>
+    <div id="modalKpis" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;"></div>
+    <div style="font-size:11px;color:#666876;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">Ranking do mes</div>
+    <div id="modalRank"></div>
+  </div>
 </div>
+<style>
+.modal-kpi{background:#1e2029;border-radius:8px;padding:12px 14px}
+.modal-kpi-label{font-size:10px;color:#666876;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.modal-kpi-val{font-size:18px;font-weight:300;font-family:'DM Mono',monospace}
+.modal-rank-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid rgba(255,255,255,0.07)}
+.modal-rank-item:last-child{border:none}
+.modal-rank-pos{font-size:10px;color:#666876;width:14px}
+.modal-rank-name{font-size:12px;flex:1}
+.modal-rank-bar-bg{height:4px;border-radius:4px;background:#0e0f13;flex:2;overflow:hidden}
+.modal-rank-bar-fill{height:100%;border-radius:4px}
+.modal-rank-val{font-size:11px;font-family:'DM Mono',monospace;color:#666876;min-width:52px;text-align:right}
+</style>
 
 <script>
-const APPS_SCRIPT_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://script.google.com/macros/s/AKfycbyE8GdWyCUGUPlV5L0Lu2_La7ZfuMJSuam9jh3xkPOPPva8vq6zQquZBUzJv5WHcaQi/exec');
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyE8GdWyCUGUPlV5L0Lu2_La7ZfuMJSuam9jh3xkPOPPva8vq6zQquZBUzJv5WHcaQi/exec';
 
 const COLORS = ['#7c6fff','#2dd4a0','#f06292','#f5a623','#4fa3e0','#a78bfa','#34d399','#fb923c'];
 const CASAS = [
@@ -323,7 +346,11 @@ function buildMainChart(type, meses, totais, melhorIdx) {
     },
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y)}}},
+      onClick:(e,els)=>{ if(els.length) openMonthModal(els[0].index); },
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y),footer:()=>'Clique para ver insights'}}
+      },
       scales:{
         x:{grid:{display:false},ticks:{color:'#666876',font:{size:11},autoSkip:false},border:{display:false}},
         y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:11},callback:v=>fmtK(v)},border:{display:false}}
@@ -331,6 +358,40 @@ function buildMainChart(type, meses, totais, melhorIdx) {
     }
   });
 }
+
+function openMonthModal(idx) {
+  const r = allData[idx];
+  if(!r) return;
+  const mes = r.mes+'/'+r.ano;
+  const total = parseFloat(r.total_geral)||0;
+  const contas = ['yan_yago','fabricio_yasmin','felype','rico','theuzin','bruno','brenda','lucio_roseane','outros'];
+  const labels = ['Yan/Yago','Fabricio/Yas','Felype','Rico','Theuzin','Bruno','Brenda','Lucio/Rose','Outros'];
+  const vals = contas.map(c=>parseFloat(r[c])||0);
+  const sorted = vals.map((v,i)=>({v,i})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const maxVal = sorted[0]?sorted[0].v:1;
+  const top = sorted[0];
+  document.getElementById('modalTitle').textContent = mes+' — Insights';
+  document.getElementById('modalKpis').innerHTML =
+    '<div class="modal-kpi"><div class="modal-kpi-label">Total do mes</div><div class="modal-kpi-val">'+fmtFull(total)+'</div></div>'+
+    '<div class="modal-kpi"><div class="modal-kpi-label">Top conta</div><div class="modal-kpi-val" style="font-size:15px">'+(top?labels[top.i]:'')+'</div></div>'+
+    '<div class="modal-kpi"><div class="modal-kpi-label">Maior valor</div><div class="modal-kpi-val">'+(top?fmtK(top.v):'')+'</div></div>'+
+    '<div class="modal-kpi"><div class="modal-kpi-label">Contas ativas</div><div class="modal-kpi-val">'+sorted.length+'</div></div>';
+  document.getElementById('modalRank').innerHTML = sorted.map(function(item,pos){
+    var v=item.v,i=item.i;
+    return '<div class="modal-rank-item">'+
+      '<span class="modal-rank-pos">'+(pos+1)+'</span>'+
+      '<span class="modal-rank-name">'+labels[i]+'</span>'+
+      '<div class="modal-rank-bar-bg"><div class="modal-rank-bar-fill" style="width:'+(v/maxVal*100).toFixed(0)+'%;background:'+COLORS[i]+'"></div></div>'+
+      '<span class="modal-rank-val">'+fmtK(v)+'</span>'+
+    '</div>';
+  }).join('');
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+window.closeModal = function(e) {
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+};
 
 window.toggleChart = function(type) {
   document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('on', b.textContent.toLowerCase().includes(type==='bar'?'barr':'linh')));
