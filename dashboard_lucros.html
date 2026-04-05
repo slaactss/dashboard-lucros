@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Lucros 2025/26</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f0;
+    --muted: #666876;
+    --accent: #7c6fff;
+    --green: #2dd4a0;
+    --amber: #f5a623;
+    --pink: #f06292;
+    --blue: #4fa3e0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 0.5px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .logo-text { font-size: 14px; font-weight: 500; letter-spacing: .02em; }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .badge-live { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(45,212,160,0.12); color: var(--green); border: 0.5px solid rgba(45,212,160,0.3); }
+  #last-updated { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .kpi {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .kpi:hover { border-color: rgba(255,255,255,0.15); }
+  .kpi-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .kpi-val { font-size: 26px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
+  .kpi-meta { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .kpi-meta span { color: var(--green); }
+
+  .grid2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid2b { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .card-tag { font-size: 10px; color: var(--muted); background: var(--surface2); padding: 3px 8px; border-radius: 20px; }
+
+  .seg { display: flex; gap: 4px; }
+  .seg-btn {
+    font-size: 11px; padding: 5px 12px; border-radius: 20px;
+    border: 0.5px solid var(--border); background: transparent;
+    color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all .15s;
+  }
+  .seg-btn.on { background: var(--surface2); color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  .rank-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .rank-item:last-child { border: none; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+  .rank-name { font-size: 12px; color: var(--text); flex: 1; }
+  .rank-bar-bg { height: 4px; border-radius: 4px; background: var(--surface2); flex: 2; overflow: hidden; }
+  .rank-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+  .rank-val { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); min-width: 56px; text-align: right; }
+
+  .loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--muted); font-size: 13px; gap: 8px; }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg { color: #f06292; font-size: 12px; text-align: center; padding: 20px; }
+
+  @media(max-width:768px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .grid2, .grid2b { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+    .topbar { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <div>
+      <div class="logo-text">Painel de Lucros</div>
+      <div class="logo-sub">2025 / 2026</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="badge-live">ao vivo</span>
+    <span id="last-updated">carregando...</span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="kpi-row" id="kpi-row">
+    <div class="loading"><div class="spinner"></div> carregando dados...</div>
+  </div>
+
+  <div class="grid2" id="grid2" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Lucro mensal</span>
+        <div class="seg">
+          <button class="seg-btn on" onclick="toggleChart('bar')">Barras</button>
+          <button class="seg-btn" onclick="toggleChart('line')">Linha</button>
+        </div>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="chartMain"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Ranking por conta</span>
+        <span class="card-tag">acumulado</span>
+      </div>
+      <div id="rankList"></div>
+    </div>
+  </div>
+
+  <div class="grid2b" id="grid2b" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Composição mensal</span>
+        <span class="card-tag">empilhado</span>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="chartStack"></canvas></div>
+      <div id="stackLeg" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:11px;color:var(--muted)"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Casas de aposta</span>
+        <span class="card-tag">por lucro</span>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="chartCasas"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRMnYEKlmjg0gT9bhLJp4vNYaieuRvT7nUHfK2PObfgnCUblJRpwVVQCDXK0Cpo0AYYyg3XwXh0g1Es/pub?gid=1780457305&single=true&output=csv';
+
+const COLORS = ['#7c6fff','#2dd4a0','#f06292','#f5a623','#4fa3e0','#a78bfa','#34d399','#fb923c'];
+const CASAS = [
+  {name:'Outras Casas', val:58255.35},
+  {name:'SportingBet', val:41861.70},
+  {name:'Bet365', val:37316.60},
+  {name:'BetEsporte', val:26724.42},
+  {name:'NoviBet', val:3452.94},
+  {name:'SuperBet', val:2080.85},
+  {name:'ApostaGanha', val:978.00},
+];
+
+function fmtK(v) {
+  if(v>=1000) return 'R$ '+(v/1000).toFixed(1)+'k';
+  return 'R$ '+v.toFixed(0);
+}
+function fmtFull(v) {
+  return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v=>v.trim().replace(/"/g,''));
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = vals[i]||'');
+    return obj;
+  }).filter(r=>r.mes && r.mes !== 'mes');
+}
+
+let mainChart = null;
+let allData = [];
+
+async function loadData() {
+  try {
+    const res = await fetch(CSV_URL);
+    const text = await res.text();
+    allData = parseCSV(text);
+    renderDashboard(allData);
+    document.getElementById('last-updated').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
+  } catch(e) {
+    document.getElementById('kpi-row').innerHTML = '<div class="error-msg">Erro ao carregar dados. Verifique se a planilha está publicada.</div>';
+  }
+}
+
+function renderDashboard(data) {
+  const meses = data.map(r => r.mes+'/'+String(r.ano).slice(2));
+  const totais = data.map(r => parseFloat(r.total_geral)||0);
+  const maxTotal = Math.max(...totais);
+  const melhorIdx = totais.indexOf(maxTotal);
+  const media = totais.reduce((a,b)=>a+b,0)/totais.length;
+
+  const contas = ['yan_yago','fabricio_yasmin','felype','rico','theuzin','bruno','brenda','lucio_roseane','outros'];
+  const contaLabels = ['Yan/Yago','Fabricio/Yas','Felype','Rico','Theuzin','Bruno','Brenda','Lucio/Rose','Outros'];
+  const contaInits = ['YY','FY','FL','RC','TH','BR','BR','LR','OT'];
+
+  const contaTotais = contas.map(c => data.reduce((s,r)=>s+(parseFloat(r[c])||0),0));
+  const maxConta = Math.max(...contaTotais);
+
+  // KPIs
+  const kpis = [
+    {label:'Total acumulado', val: fmtFull(totais.reduce((a,b)=>a+b,0)), meta: data[0].mes+'/'+data[0].ano+' → '+data[data.length-1].mes+'/'+data[data.length-1].ano, color:'#7c6fff'},
+    {label:'Melhor mês', val: fmtK(maxTotal), meta: meses[melhorIdx], color:'#2dd4a0'},
+    {label:'Média mensal', val: fmtK(media), meta: 'por mês', color:'#f5a623'},
+    {label:'Top operador', val: 'Yan/Yago', meta: fmtK(contaTotais[0])+' · '+((contaTotais[0]/totais.reduce((a,b)=>a+b,0))*100).toFixed(0)+'%', color:'#f06292'},
+  ];
+  document.getElementById('kpi-row').innerHTML = kpis.map(k=>`
+    <div class="kpi">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-meta"><span>${k.meta}</span></div>
+      <div class="kpi-accent" style="background:${k.color}"></div>
+    </div>
+  `).join('');
+
+  document.getElementById('grid2').style.display = 'grid';
+  document.getElementById('grid2b').style.display = 'grid';
+
+  // Main chart
+  buildMainChart('bar', meses, totais, melhorIdx);
+
+  // Rank
+  const sorted = contaTotais.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
+  document.getElementById('rankList').innerHTML = sorted.map(({v,i})=>`
+    <div class="rank-item">
+      <div class="avatar" style="background:${COLORS[i]}22;color:${COLORS[i]}">${contaInits[i]}</div>
+      <span class="rank-name">${contaLabels[i]}</span>
+      <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${(v/maxConta*100).toFixed(0)}%;background:${COLORS[i]}"></div></div>
+      <span class="rank-val">${fmtK(v)}</span>
+    </div>
+  `).join('');
+
+  // Stack chart
+  const stackCtx = document.getElementById('chartStack');
+  new Chart(stackCtx, {
+    type:'bar',
+    data:{
+      labels:meses,
+      datasets: contas.map((c,i)=>({
+        label:contaLabels[i],
+        data:data.map(r=>parseFloat(r[c])||0),
+        backgroundColor:COLORS[i],
+        borderWidth:0,
+        borderRadius:i===contas.length-1?4:0,
+        borderSkipped:false,
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>` ${c.dataset.label}: ${fmtK(c.parsed.y)}`}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{color:'#666876',font:{size:10}},border:{display:false}},
+        y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}}
+      }
+    }
+  });
+
+  const sl = document.getElementById('stackLeg');
+  contas.forEach((c,i)=>{
+    sl.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i]}"></span>${contaLabels[i]}</span>`;
+  });
+
+  // Casas chart
+  const casasCtx = document.getElementById('chartCasas');
+  new Chart(casasCtx, {
+    type:'bar',
+    data:{
+      labels:CASAS.map(c=>c.name),
+      datasets:[{data:CASAS.map(c=>c.val),backgroundColor:COLORS,borderRadius:4,borderSkipped:false,barPercentage:0.7}]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.x)}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}},
+        y:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:11}},border:{display:false}}
+      }
+    }
+  });
+}
+
+function buildMainChart(type, meses, totais, melhorIdx) {
+  if(mainChart) mainChart.destroy();
+  const ctx = document.getElementById('chartMain');
+  mainChart = new Chart(ctx, {
+    type:type,
+    data:{
+      labels:meses,
+      datasets:[{
+        label:'Total (R$)',
+        data:totais,
+        backgroundColor: type==='bar' ? totais.map((_,i)=>i===melhorIdx?'#2dd4a0':'#7c6fff') : 'rgba(124,111,255,0.15)',
+        borderColor:'#7c6fff',
+        borderRadius:type==='bar'?5:0,
+        borderSkipped:false,
+        fill:type==='line',
+        tension:0.4,
+        pointBackgroundColor:'#7c6fff',
+        pointRadius:type==='line'?4:0,
+        barPercentage:0.65,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#666876',font:{size:11},autoSkip:false},border:{display:false}},
+        y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:11},callback:v=>fmtK(v)},border:{display:false}}
+      }
+    }
+  });
+}
+
+window.toggleChart = function(type) {
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('on', b.textContent.toLowerCase().includes(type==='bar'?'barr':'linh')));
+  if(allData.length) {
+    const meses = allData.map(r=>r.mes+'/'+String(r.ano).slice(2));
+    const totais = allData.map(r=>parseFloat(r.total_geral)||0);
+    buildMainChart(type, meses, totais, totais.indexOf(Math.max(...totais)));
+  }
+};
+
+loadData();
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+</body>
+</html>
