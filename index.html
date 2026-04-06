@@ -7,89 +7,65 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0e0f13;
-    --surface: #16181f;
-    --surface2: #1e2029;
-    --border: rgba(255,255,255,0.07);
-    --text: #f0f0f0;
-    --muted: #666876;
-    --accent: #7c6fff;
-    --green: #2dd4a0;
-    --amber: #f5a623;
-    --pink: #f06292;
-    --blue: #4fa3e0;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 32px; border-bottom: 0.5px solid var(--border);
-  }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
-  .logo-text { font-size: 14px; font-weight: 500; letter-spacing: .02em; }
-  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .badge-live { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(45,212,160,0.12); color: var(--green); border: 0.5px solid rgba(45,212,160,0.3); }
-  #last-updated { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
-
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
-  .kpi {
-    background: var(--surface); border: 0.5px solid var(--border);
-    border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden;
-    transition: border-color .2s;
-  }
-  .kpi:hover { border-color: rgba(255,255,255,0.15); }
-  .kpi-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
-  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
-  .kpi-val { font-size: 26px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
-  .kpi-meta { font-size: 11px; color: var(--muted); margin-top: 6px; }
-  .kpi-meta span { color: var(--green); }
-
-  .grid2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .grid2b { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-  .card {
-    background: var(--surface); border: 0.5px solid var(--border);
-    border-radius: 12px; padding: 20px;
-  }
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
-  .card-tag { font-size: 10px; color: var(--muted); background: var(--surface2); padding: 3px 8px; border-radius: 20px; }
-
-  .seg { display: flex; gap: 4px; }
-  .seg-btn {
-    font-size: 11px; padding: 5px 12px; border-radius: 20px;
-    border: 0.5px solid var(--border); background: transparent;
-    color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif;
-    transition: all .15s;
-  }
-  .seg-btn.on { background: var(--surface2); color: var(--text); border-color: rgba(255,255,255,0.15); }
-
-  .rank-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
-  .rank-item:last-child { border: none; }
-  .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
-  .rank-name { font-size: 12px; color: var(--text); flex: 1; }
-  .rank-bar-bg { height: 4px; border-radius: 4px; background: var(--surface2); flex: 2; overflow: hidden; }
-  .rank-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
-  .rank-val { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); min-width: 56px; text-align: right; }
-
-  .loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--muted); font-size: 13px; gap: 8px; }
-  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .error-msg { color: #f06292; font-size: 12px; text-align: center; padding: 20px; }
-
-  @media(max-width:768px) {
-    .kpi-row { grid-template-columns: 1fr 1fr; }
-    .grid2, .grid2b { grid-template-columns: 1fr; }
-    .main { padding: 16px; }
-    .topbar { padding: 14px 16px; }
-  }
+:root{--bg:#0e0f13;--surface:#16181f;--surface2:#1e2029;--border:rgba(255,255,255,0.07);--text:#f0f0f0;--muted:#666876;--accent:#7c6fff;--green:#2dd4a0;--amber:#f5a623;--pink:#f06292;--blue:#4fa3e0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:0.5px solid var(--border);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+.logo-text{font-size:14px;font-weight:500;letter-spacing:.02em;}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.badge-live{font-size:11px;padding:4px 10px;border-radius:20px;background:rgba(45,212,160,0.12);color:var(--green);border:0.5px solid rgba(45,212,160,0.3);}
+#last-updated{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.tabs{display:flex;border-bottom:0.5px solid var(--border);background:var(--surface);padding:0 32px;}
+.tab-btn{font-size:13px;padding:12px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:400;transition:all .15s;}
+.tab-btn.on{color:var(--text);border-bottom-color:var(--accent);font-weight:500;}
+.panel{display:none;padding:28px 32px;max-width:1400px;margin:0 auto;}
+.panel.on{display:block;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
+.kpi:hover{border-color:rgba(255,255,255,0.15);}
+.kpi-accent{position:absolute;bottom:0;left:0;right:0;height:2px;}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.kpi-val{font-size:26px;font-weight:300;color:var(--text);line-height:1;font-family:'DM Mono',monospace;}
+.kpi-meta{font-size:11px;color:var(--muted);margin-top:6px;}
+.kpi-meta span{color:var(--green);}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px;}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:20px;}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.card-title{font-size:13px;font-weight:500;color:var(--text);}
+.card-tag{font-size:10px;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:20px;}
+.seg{display:flex;gap:4px;}
+.seg-btn{font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.seg-btn.on{background:var(--surface2);color:var(--text);border-color:rgba(255,255,255,0.15);}
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);}
+.rank-item:last-child{border:none;}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;}
+.rank-name{font-size:12px;color:var(--text);flex:1;}
+.rank-bar-bg{height:4px;border-radius:4px;background:var(--surface2);flex:2;overflow:hidden;}
+.rank-bar-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.rank-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);min-width:56px;text-align:right;}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--muted);font-size:13px;gap:8px;}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-msg{color:#f06292;font-size:12px;text-align:center;padding:20px;}
+.leg{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:11px;color:var(--muted);}
+.giros-stat{background:var(--surface2);border-radius:10px;padding:14px 16px;text-align:center;}
+.giros-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.giros-stat-val{font-size:20px;font-weight:300;font-family:'DM Mono',monospace;color:var(--text);}
+.modal-kpi{background:#1e2029;border-radius:8px;padding:12px 14px;}
+.modal-kpi-label{font-size:10px;color:#666876;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.modal-kpi-val{font-size:18px;font-weight:300;font-family:'DM Mono',monospace;}
+.modal-rank-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid rgba(255,255,255,0.07);}
+.modal-rank-item:last-child{border:none;}
+.modal-rank-pos{font-size:10px;color:#666876;width:14px;}
+.modal-rank-name{font-size:12px;flex:1;}
+.modal-rank-bar-bg{height:4px;border-radius:4px;background:#0e0f13;flex:2;overflow:hidden;}
+.modal-rank-bar-fill{height:100%;border-radius:4px;}
+.modal-rank-val{font-size:11px;font-family:'DM Mono',monospace;color:#666876;min-width:52px;text-align:right;}
+@media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr;}.grid2,.grid2b{grid-template-columns:1fr;}.panel{padding:16px;}.topbar,.tabs{padding-left:16px;padding-right:16px;}}
 </style>
 </head>
 <body>
@@ -108,11 +84,17 @@
   </div>
 </div>
 
-<div class="main">
+<div class="tabs">
+  <button class="tab-btn on" onclick="switchTab('lucros')">Lucros</button>
+  <button class="tab-btn" onclick="switchTab('freebets')">Freebets</button>
+  <button class="tab-btn" onclick="switchTab('giros')">Giros</button>
+</div>
+
+<!-- PAINEL LUCROS -->
+<div id="panel-lucros" class="panel on">
   <div class="kpi-row" id="kpi-row">
     <div class="loading"><div class="spinner"></div> carregando dados...</div>
   </div>
-
   <div class="grid2" id="grid2" style="display:none">
     <div class="card">
       <div class="card-header">
@@ -125,32 +107,74 @@
       <div style="position:relative;height:220px"><canvas id="chartMain"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">Ranking por conta</span>
-        <span class="card-tag">acumulado</span>
-      </div>
+      <div class="card-header"><span class="card-title">Ranking por conta</span><span class="card-tag">acumulado</span></div>
       <div id="rankList"></div>
     </div>
   </div>
-
   <div class="grid2b" id="grid2b" style="display:none">
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">Composição mensal</span>
-        <span class="card-tag">empilhado</span>
-      </div>
+      <div class="card-header"><span class="card-title">Composição mensal</span><span class="card-tag">empilhado</span></div>
       <div style="position:relative;height:220px"><canvas id="chartStack"></canvas></div>
-      <div id="stackLeg" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:11px;color:var(--muted)"></div>
+      <div id="stackLeg" class="leg"></div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">Casas de aposta</span>
-        <span class="card-tag">por lucro</span>
-      </div>
+      <div class="card-header"><span class="card-title">Casas de aposta</span><span class="card-tag">por lucro</span></div>
       <div style="position:relative;height:220px"><canvas id="chartCasas"></canvas></div>
     </div>
   </div>
+</div>
 
+<!-- PAINEL FREEBETS -->
+<div id="panel-freebets" class="panel">
+  <div class="kpi-row" id="fb-kpi-row">
+    <div class="loading"><div class="spinner"></div> carregando...</div>
+  </div>
+  <div class="grid2" id="fb-grid2" style="display:none">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Lucro liquido por mes</span><span class="card-tag">freebets</span></div>
+      <div style="position:relative;height:220px"><canvas id="chartFbMes"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Resumo geral</span><span class="card-tag">acumulado</span></div>
+      <div id="fbResumo" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;"></div>
+    </div>
+  </div>
+  <div class="grid2b" id="fb-grid2b" style="display:none">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Volume FB vs lucro liquido</span><span class="card-tag">comparativo</span></div>
+      <div style="position:relative;height:220px"><canvas id="chartFbVol"></canvas></div>
+      <div class="leg">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#7c6fff"></span>Volume FB</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#2dd4a0"></span>Lucro liquido</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">ROI por mes</span><span class="card-tag">%</span></div>
+      <div style="position:relative;height:220px"><canvas id="chartFbRoi"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAINEL GIROS -->
+<div id="panel-giros" class="panel">
+  <div class="kpi-row" id="giros-kpi-row">
+    <div class="loading"><div class="spinner"></div> carregando...</div>
+  </div>
+  <div id="giros-content" style="display:none">
+    <div class="grid2" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Lucro por mes</span><span class="card-tag">giros</span></div>
+        <div style="position:relative;height:220px"><canvas id="chartGirosMes"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Detalhes por mes</span><span class="card-tag">resumo</span></div>
+        <div id="girosDetalhes"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
 <div id="modalOverlay" onclick="closeModal(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;">
   <div style="background:#16181f;border:0.5px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;width:480px;max-width:92vw;transform:translateY(10px);transition:transform .2s;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -162,247 +186,216 @@
     <div id="modalRank"></div>
   </div>
 </div>
-<style>
-.modal-kpi{background:#1e2029;border-radius:8px;padding:12px 14px}
-.modal-kpi-label{font-size:10px;color:#666876;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.modal-kpi-val{font-size:18px;font-weight:300;font-family:'DM Mono',monospace}
-.modal-rank-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid rgba(255,255,255,0.07)}
-.modal-rank-item:last-child{border:none}
-.modal-rank-pos{font-size:10px;color:#666876;width:14px}
-.modal-rank-name{font-size:12px;flex:1}
-.modal-rank-bar-bg{height:4px;border-radius:4px;background:#0e0f13;flex:2;overflow:hidden}
-.modal-rank-bar-fill{height:100%;border-radius:4px}
-.modal-rank-val{font-size:11px;font-family:'DM Mono',monospace;color:#666876;min-width:52px;text-align:right}
-</style>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyE8GdWyCUGUPlV5L0Lu2_La7ZfuMJSuam9jh3xkPOPPva8vq6zQquZBUzJv5WHcaQi/exec';
-
+const BASE_URL = 'https://corsproxy.io/?url='+encodeURIComponent('https://script.google.com/macros/s/AKfycbyE8GdWyCUGUPlV5L0Lu2_La7ZfuMJSuam9jh3xkPOPPva8vq6zQquZBUzJv5WHcaQi/exec');
 const COLORS = ['#7c6fff','#2dd4a0','#f06292','#f5a623','#4fa3e0','#a78bfa','#34d399','#fb923c'];
 const CASAS = [
-  {name:'Outras Casas', val:58255.35},
-  {name:'SportingBet', val:41861.70},
-  {name:'Bet365', val:37316.60},
-  {name:'BetEsporte', val:26724.42},
-  {name:'NoviBet', val:3452.94},
-  {name:'SuperBet', val:2080.85},
-  {name:'ApostaGanha', val:978.00},
+  {name:'Outras Casas',val:58255.35},{name:'SportingBet',val:41861.70},
+  {name:'Bet365',val:37316.60},{name:'BetEsporte',val:26724.42},
+  {name:'NoviBet',val:3452.94},{name:'SuperBet',val:2080.85},{name:'ApostaGanha',val:978.00},
 ];
 
-function fmtK(v) {
-  if(v>=1000) return 'R$ '+(v/1000).toFixed(1)+'k';
-  return 'R$ '+v.toFixed(0);
-}
-function fmtFull(v) {
-  return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
+function fmtK(v){if(Math.abs(v)>=1000)return'R$ '+(v/1000).toFixed(1)+'k';return'R$ '+Number(v).toFixed(0);}
+function fmtFull(v){return'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtPct(v){return(v*100).toFixed(1)+'%';}
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
-  return lines.slice(1).map(line => {
-    const vals = line.split(',').map(v=>v.trim().replace(/"/g,''));
-    const obj = {};
-    headers.forEach((h,i) => obj[h] = vals[i]||'');
-    return obj;
-  }).filter(r=>r.mes && r.mes !== 'mes');
+let mainChart=null, allData=[], fbData=[], girosData=[];
+let fbRendered=false, girosRendered=false;
+
+async function fetchAba(aba){
+  const res = await fetch(BASE_URL+'&aba='+aba);
+  const json = await res.json();
+  return json.map(r=>{const o={};Object.keys(r).forEach(k=>o[k.toLowerCase().trim()]=r[k]);return o;});
 }
 
-let mainChart = null;
-let allData = [];
-
-async function loadData() {
-  try {
-    const res = await fetch(APPS_SCRIPT_URL);
-    const json = await res.json();
-    allData = json.map(r => {
-      const obj = {};
-      Object.keys(r).forEach(k => obj[k.toLowerCase()] = r[k]);
-      return obj;
-    }).filter(r => r.mes && r.mes !== 'mes');
-    renderDashboard(allData);
-    document.getElementById('last-updated').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR');
-  } catch(e) {
-    document.getElementById('kpi-row').innerHTML = '<div class="error-msg">Erro ao carregar dados: ' + e.message + '</div>';
+async function loadData(){
+  try{
+    allData = await fetchAba('dashboard');
+    renderLucros(allData);
+    document.getElementById('last-updated').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR');
+  }catch(e){
+    document.getElementById('kpi-row').innerHTML='<div class="error-msg">Erro: '+e.message+'</div>';
   }
 }
 
-function renderDashboard(data) {
-  const meses = data.map(r => r.mes+'/'+String(r.ano).slice(2));
-  const totais = data.map(r => parseFloat(r.total_geral)||0);
-  const maxTotal = Math.max(...totais);
-  const melhorIdx = totais.indexOf(maxTotal);
-  const media = totais.reduce((a,b)=>a+b,0)/totais.length;
+window.switchTab = function(tab){
+  ['lucros','freebets','giros'].forEach(t=>{
+    document.getElementById('panel-'+t).classList.toggle('on',t===tab);
+    document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+      b.classList.toggle('on',['lucros','freebets','giros'][i]===tab);
+    });
+  });
+  if(tab==='freebets'&&!fbRendered){loadFreebets();}
+  if(tab==='giros'&&!girosRendered){loadGiros();}
+};
 
-  const contas = ['yan_yago','fabricio_yasmin','felype','rico','theuzin','bruno','brenda','lucio_roseane','outros'];
-  const contaLabels = ['Yan/Yago','Fabricio/Yas','Felype','Rico','Theuzin','Bruno','Brenda','Lucio/Rose','Outros'];
-  const contaInits = ['YY','FY','FL','RC','TH','BR','BR','LR','OT'];
+async function loadFreebets(){
+  try{
+    fbData = await fetchAba('freebets');
+    renderFreebets(fbData);
+    fbRendered=true;
+  }catch(e){
+    document.getElementById('fb-kpi-row').innerHTML='<div class="error-msg">Erro: '+e.message+'</div>';
+  }
+}
 
-  const contaTotais = contas.map(c => data.reduce((s,r)=>s+(parseFloat(r[c])||0),0));
-  const maxConta = Math.max(...contaTotais);
+async function loadGiros(){
+  try{
+    girosData = await fetchAba('giros');
+    renderGiros(girosData);
+    girosRendered=true;
+  }catch(e){
+    document.getElementById('giros-kpi-row').innerHTML='<div class="error-msg">Erro: '+e.message+'</div>';
+  }
+}
 
-  // KPIs
-  const kpis = [
-    {label:'Total acumulado', val: fmtFull(totais.reduce((a,b)=>a+b,0)), meta: data[0].mes+'/'+data[0].ano+' → '+data[data.length-1].mes+'/'+data[data.length-1].ano, color:'#7c6fff'},
-    {label:'Melhor mês', val: fmtK(maxTotal), meta: meses[melhorIdx], color:'#2dd4a0'},
-    {label:'Média mensal', val: fmtK(media), meta: 'por mês', color:'#f5a623'},
-    {label:'Top operador', val: 'Yan/Yago', meta: fmtK(contaTotais[0])+' · '+((contaTotais[0]/totais.reduce((a,b)=>a+b,0))*100).toFixed(0)+'%', color:'#f06292'},
-  ];
-  document.getElementById('kpi-row').innerHTML = kpis.map(k=>`
-    <div class="kpi">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-val">${k.val}</div>
-      <div class="kpi-meta"><span>${k.meta}</span></div>
-      <div class="kpi-accent" style="background:${k.color}"></div>
-    </div>
-  `).join('');
+function renderLucros(data){
+  const meses=data.map(r=>r.mes+'/'+String(r.ano).slice(2));
+  const totais=data.map(r=>parseFloat(r.total_geral)||0);
+  const maxTotal=Math.max(...totais);
+  const melhorIdx=totais.indexOf(maxTotal);
+  const media=totais.reduce((a,b)=>a+b,0)/totais.length;
+  const contas=['yan_yago','fabricio_yasmin','felype','rico','theuzin','bruno','brenda','lucio_roseane','outros'];
+  const contaLabels=['Yan/Yago','Fabricio/Yas','Felype','Rico','Theuzin','Bruno','Brenda','Lucio/Rose','Outros'];
+  const contaInits=['YY','FY','FL','RC','TH','BR','BR','LR','OT'];
+  const contaTotais=contas.map(c=>data.reduce((s,r)=>s+(parseFloat(r[c])||0),0));
+  const maxConta=Math.max(...contaTotais);
+  const topIdx=contaTotais.indexOf(Math.max(...contaTotais));
 
-  document.getElementById('grid2').style.display = 'grid';
-  document.getElementById('grid2b').style.display = 'grid';
+  document.getElementById('kpi-row').innerHTML=[
+    {label:'Total acumulado',val:fmtFull(totais.reduce((a,b)=>a+b,0)),meta:data[0].mes+'/'+data[0].ano+' → '+data[data.length-1].mes+'/'+data[data.length-1].ano,color:'#7c6fff'},
+    {label:'Melhor mês',val:fmtK(maxTotal),meta:meses[melhorIdx],color:'#2dd4a0'},
+    {label:'Média mensal',val:fmtK(media),meta:'por mês',color:'#f5a623'},
+    {label:'Top operador',val:contaLabels[topIdx],meta:fmtK(contaTotais[topIdx])+' · '+((contaTotais[topIdx]/totais.reduce((a,b)=>a+b,0))*100).toFixed(0)+'%',color:'#f06292'},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-val">${k.val}</div><div class="kpi-meta"><span>${k.meta}</span></div><div class="kpi-accent" style="background:${k.color}"></div></div>`).join('');
 
-  // Main chart
-  buildMainChart('bar', meses, totais, melhorIdx);
+  document.getElementById('grid2').style.display='grid';
+  document.getElementById('grid2b').style.display='grid';
+  buildMainChart('bar',meses,totais,melhorIdx);
 
-  // Rank
-  const sorted = contaTotais.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
-  document.getElementById('rankList').innerHTML = sorted.map(({v,i})=>`
+  const sorted=contaTotais.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
+  document.getElementById('rankList').innerHTML=sorted.map(({v,i})=>`
     <div class="rank-item">
       <div class="avatar" style="background:${COLORS[i]}22;color:${COLORS[i]}">${contaInits[i]}</div>
       <span class="rank-name">${contaLabels[i]}</span>
       <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${(v/maxConta*100).toFixed(0)}%;background:${COLORS[i]}"></div></div>
       <span class="rank-val">${fmtK(v)}</span>
-    </div>
-  `).join('');
+    </div>`).join('');
 
-  // Stack chart
-  const stackCtx = document.getElementById('chartStack');
-  new Chart(stackCtx, {
-    type:'bar',
-    data:{
-      labels:meses,
-      datasets: contas.map((c,i)=>({
-        label:contaLabels[i],
-        data:data.map(r=>parseFloat(r[c])||0),
-        backgroundColor:COLORS[i],
-        borderWidth:0,
-        borderRadius:i===contas.length-1?4:0,
-        borderSkipped:false,
-      }))
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>` ${c.dataset.label}: ${fmtK(c.parsed.y)}`}}},
-      scales:{
-        x:{stacked:true,grid:{display:false},ticks:{color:'#666876',font:{size:10}},border:{display:false}},
-        y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}}
-      }
-    }
-  });
-
-  const sl = document.getElementById('stackLeg');
-  contas.forEach((c,i)=>{
-    sl.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i]}"></span>${contaLabels[i]}</span>`;
-  });
-
-  // Casas chart
-  const casasCtx = document.getElementById('chartCasas');
-  new Chart(casasCtx, {
-    type:'bar',
-    data:{
-      labels:CASAS.map(c=>c.name),
-      datasets:[{data:CASAS.map(c=>c.val),backgroundColor:COLORS,borderRadius:4,borderSkipped:false,barPercentage:0.7}]
-    },
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.x)}}},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}},
-        y:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:11}},border:{display:false}}
-      }
-    }
-  });
+  new Chart(document.getElementById('chartStack'),{type:'bar',data:{labels:meses,datasets:contas.map((c,i)=>({label:contaLabels[i],data:data.map(r=>parseFloat(r[c])||0),backgroundColor:COLORS[i],borderWidth:0,borderRadius:i===contas.length-1?4:0,borderSkipped:false}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>` ${c.dataset.label}: ${fmtK(c.parsed.y)}`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#666876',font:{size:10}},border:{display:false}},y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}}}}});
+  const sl=document.getElementById('stackLeg');
+  contas.forEach((c,i)=>{sl.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i]}"></span>${contaLabels[i]}</span>`;});
+  new Chart(document.getElementById('chartCasas'),{type:'bar',data:{labels:CASAS.map(c=>c.name),datasets:[{data:CASAS.map(c=>c.val),backgroundColor:COLORS,borderRadius:4,borderSkipped:false,barPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.x)}}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}},y:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:11}},border:{display:false}}}}});
 }
 
-function buildMainChart(type, meses, totais, melhorIdx) {
-  if(mainChart) mainChart.destroy();
-  const ctx = document.getElementById('chartMain');
-  mainChart = new Chart(ctx, {
-    type:type,
-    data:{
-      labels:meses,
-      datasets:[{
-        label:'Total (R$)',
-        data:totais,
-        backgroundColor: type==='bar' ? totais.map((_,i)=>i===melhorIdx?'#2dd4a0':'#7c6fff') : 'rgba(124,111,255,0.15)',
-        borderColor:'#7c6fff',
-        borderRadius:type==='bar'?5:0,
-        borderSkipped:false,
-        fill:type==='line',
-        tension:0.4,
-        pointBackgroundColor:'#7c6fff',
-        pointRadius:type==='line'?4:0,
-        barPercentage:0.65,
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      onClick:(e,els)=>{ if(els.length) openMonthModal(els[0].index); },
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y),footer:()=>'Clique para ver insights'}}
-      },
-      scales:{
-        x:{grid:{display:false},ticks:{color:'#666876',font:{size:11},autoSkip:false},border:{display:false}},
-        y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:11},callback:v=>fmtK(v)},border:{display:false}}
-      }
-    }
-  });
+function renderFreebets(data){
+  const meses=data.map(r=>r.mes+'/'+String(r.ano).slice(2));
+  const liquido=data.map(r=>parseFloat(r.liquido)||0);
+  const volume=data.map(r=>parseFloat(r.volume)||0);
+  const roi=data.map(r=>parseFloat(r.roi)||0);
+  const totalLiq=liquido.reduce((a,b)=>a+b,0);
+  const totalVol=volume.reduce((a,b)=>a+b,0);
+  const totalConv=data.reduce((s,r)=>s+(parseFloat(r.convertidas)||0),0);
+  const totalAtivas=data.reduce((s,r)=>s+(parseFloat(r.ativas)||0),0);
+  const roiGeral=totalVol>0?totalLiq/totalVol:0;
+  const melhorIdx=liquido.indexOf(Math.max(...liquido));
+
+  document.getElementById('fb-kpi-row').innerHTML=[
+    {label:'Total liquido',val:fmtFull(totalLiq),meta:'freebets convertidas',color:'#7c6fff'},
+    {label:'Melhor mes',val:fmtK(Math.max(...liquido)),meta:meses[melhorIdx],color:'#2dd4a0'},
+    {label:'ROI geral',val:fmtPct(roiGeral),meta:'retorno sobre volume',color:'#f5a623'},
+    {label:'FB convertidas',val:totalConv.toFixed(0),meta:totalAtivas>0?totalAtivas+' ativas':'todas convertidas',color:'#f06292'},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-val">${k.val}</div><div class="kpi-meta"><span>${k.meta}</span></div><div class="kpi-accent" style="background:${k.color}"></div></div>`).join('');
+
+  document.getElementById('fb-grid2').style.display='grid';
+  document.getElementById('fb-grid2b').style.display='grid';
+
+  new Chart(document.getElementById('chartFbMes'),{type:'bar',data:{labels:meses,datasets:[{data:liquido,backgroundColor:liquido.map(v=>v===Math.max(...liquido)?'#2dd4a0':'#7c6fff'),borderRadius:5,borderSkipped:false,barPercentage:0.65}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#666876',font:{size:11},autoSkip:false},border:{display:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:11},callback:v=>fmtK(v)},border:{display:false}}}}});
+
+  document.getElementById('fbResumo').innerHTML=[
+    {label:'Volume total',val:fmtFull(totalVol)},
+    {label:'Lucro total',val:fmtFull(totalLiq)},
+    {label:'Total convertidas',val:totalConv.toFixed(0)+' FBs'},
+    {label:'Ativas/Pendentes',val:totalAtivas>0?totalAtivas+' FBs':'Nenhuma'},
+  ].map(x=>`<div class="giros-stat"><div class="giros-stat-label">${x.label}</div><div class="giros-stat-val">${x.val}</div></div>`).join('');
+
+  new Chart(document.getElementById('chartFbVol'),{type:'bar',data:{labels:meses,datasets:[{label:'Volume FB',data:volume,backgroundColor:'#7c6fff',borderRadius:3,barPercentage:0.4,categoryPercentage:0.8},{label:'Lucro liquido',data:liquido,backgroundColor:'#2dd4a0',borderRadius:3,barPercentage:0.4,categoryPercentage:0.8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:c=>` ${c.dataset.label}: ${fmtK(c.parsed.y)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#666876',font:{size:10}},border:{display:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>fmtK(v)},border:{display:false}}}}});
+
+  new Chart(document.getElementById('chartFbRoi'),{type:'line',data:{labels:meses,datasets:[{data:roi.map(v=>+(v*100).toFixed(1)),borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#f5a623',pointRadius:4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(1)+'%'}}},scales:{x:{grid:{display:false},ticks:{color:'#666876',font:{size:10}},border:{display:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:10},callback:v=>v+'%'},border:{display:false}}}}});
 }
 
-function openMonthModal(idx) {
-  const r = allData[idx];
-  if(!r) return;
-  const mes = r.mes+'/'+r.ano;
-  const total = parseFloat(r.total_geral)||0;
-  const contas = ['yan_yago','fabricio_yasmin','felype','rico','theuzin','bruno','brenda','lucio_roseane','outros'];
-  const labels = ['Yan/Yago','Fabricio/Yas','Felype','Rico','Theuzin','Bruno','Brenda','Lucio/Rose','Outros'];
-  const vals = contas.map(c=>parseFloat(r[c])||0);
-  const sorted = vals.map((v,i)=>({v,i})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
-  const maxVal = sorted[0]?sorted[0].v:1;
-  const top = sorted[0];
-  document.getElementById('modalTitle').textContent = mes+' — Insights';
-  document.getElementById('modalKpis').innerHTML =
+function renderGiros(data){
+  const meses=data.map(r=>r.mes+'/'+String(r.ano).slice(2));
+  const totais=data.map(r=>parseFloat(r.total)||0);
+  const maiores=data.map(r=>parseFloat(r.maior_valor)||0);
+  const qtds=data.map(r=>parseFloat(r.qtd)||0);
+  const totalGeral=totais.reduce((a,b)=>a+b,0);
+  const melhorIdx=totais.indexOf(Math.max(...totais));
+  const maiorValor=Math.max(...maiores);
+  const totalQtd=qtds.reduce((a,b)=>a+b,0);
+
+  document.getElementById('giros-kpi-row').innerHTML=[
+    {label:'Total acumulado',val:fmtFull(totalGeral),meta:'giros convertidos',color:'#7c6fff'},
+    {label:'Melhor mes',val:fmtK(Math.max(...totais)),meta:meses[melhorIdx],color:'#2dd4a0'},
+    {label:'Maior giro',val:fmtFull(maiorValor),meta:'valor individual',color:'#f5a623'},
+    {label:'Total de giros',val:totalQtd.toFixed(0),meta:'operacoes registradas',color:'#f06292'},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-val">${k.val}</div><div class="kpi-meta"><span>${k.meta}</span></div><div class="kpi-accent" style="background:${k.color}"></div></div>`).join('');
+
+  document.getElementById('giros-content').style.display='block';
+
+  new Chart(document.getElementById('chartGirosMes'),{type:'bar',data:{labels:meses,datasets:[{data:totais,backgroundColor:totais.map(v=>v===Math.max(...totais)?'#2dd4a0':'#7c6fff'),borderRadius:5,borderSkipped:false,barPercentage:0.65}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#666876',font:{size:11}},border:{display:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:11},callback:v=>fmtK(v)},border:{display:false}}}}});
+
+  document.getElementById('girosDetalhes').innerHTML=data.map((r,i)=>`
+    <div class="rank-item">
+      <div class="avatar" style="background:${COLORS[i%COLORS.length]}22;color:${COLORS[i%COLORS.length]}">${r.mes}</div>
+      <span class="rank-name">${meses[i]}</span>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <span style="font-size:12px;font-weight:500;color:var(--text)">${fmtFull(parseFloat(r.total)||0)}</span>
+        <span style="font-size:10px;color:var(--muted)">maior: ${fmtFull(parseFloat(r.maior_valor)||0)} · ${parseFloat(r.qtd)||0} giros</span>
+      </div>
+    </div>`).join('');
+}
+
+function buildMainChart(type,meses,totais,melhorIdx){
+  if(mainChart)mainChart.destroy();
+  mainChart=new Chart(document.getElementById('chartMain'),{type:type,data:{labels:meses,datasets:[{label:'Total (R$)',data:totais,backgroundColor:type==='bar'?totais.map((_,i)=>i===melhorIdx?'#2dd4a0':'#7c6fff'):'rgba(124,111,255,0.15)',borderColor:'#7c6fff',borderRadius:type==='bar'?5:0,borderSkipped:false,fill:type==='line',tension:0.4,pointBackgroundColor:'#7c6fff',pointRadius:type==='line'?4:0,barPercentage:0.65}]},options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length)openMonthModal(els[0].index);},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtFull(c.parsed.y),footer:()=>'Clique para ver insights'}}},scales:{x:{grid:{display:false},ticks:{color:'#666876',font:{size:11},autoSkip:false},border:{display:false}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#666876',font:{size:11},callback:v=>fmtK(v)},border:{display:false}}}}});
+}
+
+function openMonthModal(idx){
+  const r=allData[idx];if(!r)return;
+  const mes=r.mes+'/'+r.ano;
+  const total=parseFloat(r.total_geral)||0;
+  const contas=['yan_yago','fabricio_yasmin','felype','rico','theuzin','bruno','brenda','lucio_roseane','outros'];
+  const labels=['Yan/Yago','Fabricio/Yas','Felype','Rico','Theuzin','Bruno','Brenda','Lucio/Rose','Outros'];
+  const vals=contas.map(c=>parseFloat(r[c])||0);
+  const sorted=vals.map((v,i)=>({v,i})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const maxVal=sorted[0]?sorted[0].v:1;
+  const top=sorted[0];
+  document.getElementById('modalTitle').textContent=mes+' — Insights';
+  document.getElementById('modalKpis').innerHTML=
     '<div class="modal-kpi"><div class="modal-kpi-label">Total do mes</div><div class="modal-kpi-val">'+fmtFull(total)+'</div></div>'+
     '<div class="modal-kpi"><div class="modal-kpi-label">Top conta</div><div class="modal-kpi-val" style="font-size:15px">'+(top?labels[top.i]:'')+'</div></div>'+
     '<div class="modal-kpi"><div class="modal-kpi-label">Maior valor</div><div class="modal-kpi-val">'+(top?fmtK(top.v):'')+'</div></div>'+
     '<div class="modal-kpi"><div class="modal-kpi-label">Contas ativas</div><div class="modal-kpi-val">'+sorted.length+'</div></div>';
-  document.getElementById('modalRank').innerHTML = sorted.map(function(item,pos){
+  document.getElementById('modalRank').innerHTML=sorted.map(function(item,pos){
     var v=item.v,i=item.i;
-    return '<div class="modal-rank-item">'+
-      '<span class="modal-rank-pos">'+(pos+1)+'</span>'+
-      '<span class="modal-rank-name">'+labels[i]+'</span>'+
-      '<div class="modal-rank-bar-bg"><div class="modal-rank-bar-fill" style="width:'+(v/maxVal*100).toFixed(0)+'%;background:'+COLORS[i]+'"></div></div>'+
-      '<span class="modal-rank-val">'+fmtK(v)+'</span>'+
-    '</div>';
+    return '<div class="modal-rank-item"><span class="modal-rank-pos">'+(pos+1)+'</span><span class="modal-rank-name">'+labels[i]+'</span><div class="modal-rank-bar-bg"><div class="modal-rank-bar-fill" style="width:'+(v/maxVal*100).toFixed(0)+'%;background:'+COLORS[i]+'"></div></div><span class="modal-rank-val">'+fmtK(v)+'</span></div>';
   }).join('');
   var mo=document.getElementById('modalOverlay');mo.style.opacity='1';mo.style.pointerEvents='all';
 }
 
-window.closeModal = function(e) {
+window.closeModal=function(e){
   if(e.target===document.getElementById('modalOverlay')){var o=document.getElementById('modalOverlay');o.style.opacity=0;setTimeout(function(){o.style.pointerEvents='none'},200);}
 };
 
-window.toggleChart = function(type) {
-  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('on', b.textContent.toLowerCase().includes(type==='bar'?'barr':'linh')));
-  if(allData.length) {
-    const meses = allData.map(r=>r.mes+'/'+String(r.ano).slice(2));
-    const totais = allData.map(r=>parseFloat(r.total_geral)||0);
-    buildMainChart(type, meses, totais, totais.indexOf(Math.max(...totais)));
-  }
+window.toggleChart=function(type){
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase().includes(type==='bar'?'barr':'linh')));
+  if(allData.length){const meses=allData.map(r=>r.mes+'/'+String(r.ano).slice(2));const totais=allData.map(r=>parseFloat(r.total_geral)||0);buildMainChart(type,meses,totais,totais.indexOf(Math.max(...totais)));}
 };
 
 loadData();
-setInterval(loadData, 5 * 60 * 1000);
+setInterval(loadData,5*60*1000);
 </script>
 </body>
 </html>
