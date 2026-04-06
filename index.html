@@ -188,7 +188,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 
 <script>
-const BASE_URL = 'https://corsproxy.io/?url='+encodeURIComponent('https://script.google.com/macros/s/AKfycbyE8GdWyCUGUPlV5L0Lu2_La7ZfuMJSuam9jh3xkPOPPva8vq6zQquZBUzJv5WHcaQi/exec');
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyE8GdWyCUGUPlV5L0Lu2_La7ZfuMJSuam9jh3xkPOPPva8vq6zQquZBUzJv5WHcaQi/exec';
 const COLORS = ['#7c6fff','#2dd4a0','#f06292','#f5a623','#4fa3e0','#a78bfa','#34d399','#fb923c'];
 const CASAS = [
   {name:'Outras Casas',val:58255.35},{name:'SportingBet',val:41861.70},
@@ -204,7 +204,7 @@ let mainChart=null, allData=[], fbData=[], girosData=[];
 let fbRendered=false, girosRendered=false;
 
 async function fetchAba(aba){
-  const res = await fetch(BASE_URL+'&aba='+aba);
+  const res = await fetch('https://corsproxy.io/?url='+encodeURIComponent(SCRIPT_URL+'?aba='+aba));
   const json = await res.json();
   return json.map(r=>{const o={};Object.keys(r).forEach(k=>o[k.toLowerCase().trim()]=r[k]);return o;});
 }
