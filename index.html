@@ -240,8 +240,8 @@ let fbRendered=false, girosRendered=false, pagRendered=false;
 let pagFiltroAtivo='todos', pagTodosRegistros=[];
 
 async function fetchAba(aba){
-  const url = SCRIPT_URL + '?aba=' + aba + '&t=' + Date.now();
-  const res = await fetch(url, { cache: 'no-store' });
+  const proxy = 'https://corsproxy.io/?url=' + encodeURIComponent(SCRIPT_URL + '?aba=' + aba + '&t=' + Date.now());
+  const res = await fetch(proxy, { cache: 'no-store' });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
   return json.map(r=>{const o={};Object.keys(r).forEach(k=>o[k.toLowerCase().trim()]=r[k]);return o;});
